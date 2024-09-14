@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+   <flow name="api-main">
+        <http:listener config-ref="api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <ee:transform doc:name="Set vHttpHeaders" doc:id="7e77d521-aab3-4519-a6ea-e32e6829a619">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="vHttpHeaders" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "x-source-system-name" : attributes.Headers.'x-source-system-name' default 'Not Available',
+    "x-target-system-name" : attributes.Headers.'x-target-system-name' default 'Not Available',
+    "x-correlation-id" : attributes.Headers.'x-correlation-id' default uuid()
+ 
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<apikit:router config-ref="api-config" />
+    </flow>
+    <flow name="api-console">
+        <http:listener config-ref="api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="api-config" />
+    </flow>
+    <flow name="get:\healthcheck:api-config">
+        <flow-ref doc:name="get-health-check:mf-get-health-check" doc:id="34f2b891-8f45-42e6-9b2a-101a0f72448e" name="get-health-check:mf-get-health-check" />
+    </flow>
+    <flow name="get:\ping:api-config">
+        <flow-ref doc:name="get-ping:mf-get-ping" doc:id="d6929b3a-d56c-4135-9b35-168fd88a487b" name="get-ping:mf-get-ping" />
+    </flow>
+</mule>

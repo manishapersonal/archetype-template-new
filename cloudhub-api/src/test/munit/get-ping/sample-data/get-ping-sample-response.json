@@ -1,0 +1,6 @@
+{
+    "status": "alive",
+    "application": "cloudhub-api",
+    "env": "dev",
+    "version": "1.0.0"
+}

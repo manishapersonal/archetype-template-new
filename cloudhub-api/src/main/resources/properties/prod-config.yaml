@@ -1,0 +1,15 @@
+autoDiscovery:
+  apiId: "11"
+
+#JSON Logger Configuration  
+logger:
+  category: "com.ccm.mule.events"
+  disabledFields: ""
+  level:
+    scheduledProc: "INFO"
+    summary: "INFO"
+    startEnd: "INFO"
+    request: "INFO"
+    failedRecord: "ERROR"
+    pagination: "INFO"
+    error: "ERROR"

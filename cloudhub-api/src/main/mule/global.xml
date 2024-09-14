@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+
+	<configuration-properties doc:name="Common-Configuration properties" 
+		doc:id="ed1913bb-a80b-4748-9f5a-1b360c75bdb3" 
+		file="properties/common-config.yaml" />
+	<configuration-properties doc:name="Configuration properties" 
+		doc:id="44018fe0-9573-4de4-80c8-e6235bda129c" 
+		file="properties/${mule.env}-config.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" 
+		doc:name="Secure Properties Config" 
+		doc:id="346ed095-ce85-477f-bb0e-f1ef66c43969" 
+		file="properties/${mule.env}-secure-config.yaml" 
+		key="YOUR_KEY_HERE" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+
+	<api-gateway:autodiscovery apiId="${autoDiscovery.apiId}" 
+		ignoreBasePath="true" 
+		doc:name="API Autodiscovery" 
+		doc:id="c59cde05-b7db-4e9a-9b00-fafdf5f09ec4" 
+		flowRef="api-main" />
+
+	<tls:context name="common-selfsigned_tlsContext" 
+		doc:name="common-selfsigned_tlsContext"
+		doc:id="468555e2-4b31-4c24-a01b-197241f8351a">
+		<tls:trust-store insecure="true"/>
+		<tls:key-store type="jks" 
+			alias="${keystore.alias}" 
+			keyPassword="${keystore.key-pass}" 
+			password="${keystore.password}" 
+			path="${keystore.path}"/>
+	</tls:context>
+
+    <apikit:config name="api-config" 
+		api="resource::0fef0b0f-f6e2-471d-bd79-cbff0e00cc9f:template-api-raml:1.0.0:raml:zip:api.raml" 
+		outboundHeadersMapName="outboundHeaders" 
+		httpStatusVarName="httpStatus" />
+
+	<configuration doc:name="global-error-handler-Config" 
+		doc:id="684e7ace-4272-44b1-98b1-8e2aed311c9f"	
+		defaultErrorHandler-ref="global-error-handler" />
+
+	<http:listener-config name="api-httpListenerConfig"
+		doc:name="HTTP Listener config"
+		doc:id="8bb27407-701e-4106-be6f-dd934a3e923c">
+        <http:listener-connection host="${http.host}" 
+			port="${http.port}" 
+			readTimeout="${read-timeout}"/>
+    </http:listener-config>
+
+	<http:listener-config name="api-httpsListenerConfig"
+		doc:name="HTTPS Listener config"
+		doc:id="e2efa868-cd72-4666-a79e-30ebeb7ccaf3">
+        <http:listener-connection host="${https.host}" 
+			port="${https.port}" 
+			protocol="HTTPS" 
+			tlsContext="common-selfsigned_tlsContext"
+			readTimeout="${read-timeout}"/>
+    </http:listener-config>
+
+</mule>

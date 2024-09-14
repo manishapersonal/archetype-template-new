@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<flow name="get-ping:mf-get-ping" doc:id="d917aa64-9a26-4b8e-b415-b7f3c09ecb8e" >
+		<logger level="INFO" doc:name="Request Received" doc:id="2f14b08a-2c4c-4a26-8121-fdd7350ead08" message="#[%dw 2.0&#10;output application/csv header=false,separator='|'&#10;---&#10;{&#10;    &quot;api-layer-type&quot;: &quot;Template API&quot;,&#10;    &quot;api-name&quot;: &quot;cloudhub-api&quot;,    &#10;    &quot;parent-flow-name&quot;: &quot;get:\ping:api-config&quot;, &#10;    &quot;flow-name&quot;: &quot;get-ping:mf-get-ping&quot;,   &#10;    &quot;action-name&quot;: &quot;FLOW START&quot;,&#10;    &quot;correlation-id&quot;: vars.vHttpHeaders.&quot;x-correlation-id&quot;,&#10;    &quot;message&quot;: &quot;Started Ping&quot;&#10;}]"/>
+		<ee:transform doc:name="Buid ping response" doc:id="d86ab48a-49d4-4c74-8a07-8be2b7bcb56a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: "alive",
+  application: p("app.name"),
+  env: p("mule.env"),
+  version: p("app.version")
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Request Complete" doc:id="2639c936-e3bc-415d-94aa-6dbb2d8da277" message="#[%dw 2.0&#10;output application/csv header=false,separator='|'&#10;---&#10;{&#10;    &quot;api-layer-type&quot;: &quot;Template API&quot;,&#10;    &quot;api-name&quot;: &quot;cloudhub-api&quot;,    &#10;    &quot;parent-flow-name&quot;: &quot;get:\ping:api-config&quot;, &#10;    &quot;flow-name&quot;: &quot;get-ping:mf-get-ping&quot;,   &#10;    &quot;action-name&quot;: &quot;FLOW END&quot;,&#10;    &quot;correlation-id&quot;: vars.vHttpHeaders.&quot;x-correlation-id&quot;,&#10;    &quot;message&quot;: &quot;Stopped Ping&quot;&#10;}]"/>
+	</flow>
+</mule>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="get-health-check:mf-get-health-check" doc:id="d917aa64-9a26-4b8e-b415-b7f3c09ecb8e" >
+		<logger level="INFO" doc:name="Request Received" doc:id="0e949803-7419-4898-ba3e-18903258eacd" message="#[%dw 2.0&#10;output application/csv header=false,separator='|'&#10;---&#10;{&#10;    &quot;api-layer-type&quot;: &quot;Template API&quot;,&#10;    &quot;api-name&quot;: &quot;cloudhub-api&quot;,    &#10;    &quot;parent-flow-name&quot;: &quot;get:\healthcheck:api-config&quot;, &#10;    &quot;flow-name&quot;: &quot;get-health-check:mf-get-health-check&quot;,   &#10;    &quot;action-name&quot;: &quot;FLOW START&quot;,&#10;    &quot;correlation-id&quot;: vars.vHttpHeaders.&quot;x-correlation-id&quot;,&#10;    &quot;message&quot;: &quot;Started HealthCheck&quot;&#10;}]"/>
+		<ee:transform doc:name="Buid health check response" doc:id="d86ab48a-49d4-4c74-8a07-8be2b7bcb56a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: "alive",
+  application: p("app.name"),
+  env: p("mule.env"),
+  version: p("app.version"),
+  systems: [
+    {
+      name: "Not Implemented !!",
+      status: "success",
+      message: "Please implement each external system (such as SAPI, queue, DB etc) connection test"
+    } 
+  ]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Request Completed" doc:id="16effccb-ab36-4a51-b70c-1f963a75b118" message="#[%dw 2.0&#10;output application/csv header=false,separator='|'&#10;---&#10;{&#10;    &quot;api-layer-type&quot;: &quot;Template API&quot;,&#10;    &quot;api-name&quot;: &quot;cloudhub-api&quot;,    &#10;    &quot;parent-flow-name&quot;: &quot;get:\healthcheck:api-config&quot;, &#10;    &quot;flow-name&quot;: &quot;get-health-check:mf-get-health-check&quot;,   &#10;    &quot;action-name&quot;: &quot;FLOW END&quot;,&#10;    &quot;correlation-id&quot;: vars.vHttpHeaders.&quot;x-correlation-id&quot;,&#10;    &quot;message&quot;: &quot;Stopped HealthCheck&quot;&#10;}]"/>
+	
+</flow>
+</mule>
